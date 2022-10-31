@@ -27,6 +27,12 @@ THE SOFTWARE.
 #define __HIP_PLATFORM_SPIRV__
 #endif
 
+#if defined(__clang__) && defined(__HIP__)
+#define __HIP_CLANG_ONLY__ 1
+#else
+#define __HIP_CLANG_ONLY__ 0
+#endif
+
 #include <cmath>
 #include <cstdint>
 
