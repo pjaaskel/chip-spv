@@ -26,6 +26,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include <hip/driver_types.h>
 
@@ -179,6 +180,35 @@ extern "C" __device__ int printf(const char *fmt, ...)
     __attribute__((format(printf, 1, 2)));
 extern "C" __device__ void abort();
 
+// The assert part mimiced from amd_device_functions.h of amdhip.
+// We assume assert.h defines assert such that it calls __assert_fail
+// when it fails.
+
+// The noinline attribute helps encapsulate the printf expansion,
+// which otherwise has a performance impact just by increasing the
+// size of the calling function. Additionally, the weak attribute
+// allows the function to exist as a global although its definition is
+// included in every compilation unit.
+#if defined(_WIN32) || defined(_WIN64)
+extern "C" __device__ __attribute__((noinline)) __attribute__((weak))
+void _wassert(const wchar_t *_msg, const wchar_t *_file, unsigned _line) {
+    // FIXME: Need `wchar_t` support to generate assertion message.
+    __builtin_trap();
+}
+#else /* defined(_WIN32) || defined(_WIN64) */
+extern "C" __device__ __attribute__((noinline)) __attribute__((weak))
+void __assert_fail(const char *assertion,
+                   const char *file,
+                   unsigned int line,
+                   const char *function)
+  __THROW
+{
+  printf("%s:%u: %s: Device-side assertion `%s' failed.\n",
+	 file, line, function, assertion);
+  abort();
+}
+#endif
+  
 /*************************************************************************************************/
 
 typedef enum {
