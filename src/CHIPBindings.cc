@@ -3411,6 +3411,14 @@ hipError_t hipGetSymbolSize(size_t *Size, const void *Symbol) {
   CHIP_CATCH
 }
 
+int hipGetStreamDeviceId(hipStream_t Stream) {
+  CHIP_TRY
+  CHIPInitialize();
+  CHIPDevice *Device = Backend->findQueue(Stream)->getDevice();
+  return Device->getDeviceId();
+  CHIP_CATCH
+}
+
 hipError_t hipMemcpyToSymbol(const void *Symbol, const void *Src,
                              size_t SizeBytes, size_t Offset,
                              hipMemcpyKind Kind) {
