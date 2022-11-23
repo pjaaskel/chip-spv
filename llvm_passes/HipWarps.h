@@ -17,8 +17,6 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/PassManager.h"
 
-#include <map>
-
 using namespace llvm;
 
 class HipWarpsPass : public PassInfoMixin<HipWarpsPass> {

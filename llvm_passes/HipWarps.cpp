@@ -24,13 +24,10 @@
 
 #include "HipWarps.h"
 
-#include <set>
-#include <iostream>
-
 #include <llvm/IR/Metadata.h>
 #include <llvm/IR/Constants.h>
 
-#include "Config.hh"
+#include "CHIPSPVConfig.hh"
 
 PreservedAnalyses HipWarpsPass::run(Module &Mod, ModuleAnalysisManager &AM) {
 
@@ -57,16 +54,15 @@ PreservedAnalyses HipWarpsPass::run(Module &Mod, ModuleAnalysisManager &AM) {
       "_Z11__shfl_downiji",
       "_Z11__shfl_downfji",
       "_Z8__balloti",
-      "_Z23intel_sub_group_shufflefj",
       "_Z16sub_group_balloti",
-      "_Z23intel_sub_group_shuffleij",
-      "_Z27intel_sub_group_shuffle_xorij",
-      "_Z27intel_sub_group_shuffle_xorfj",
-      "_Z28intel_sub_group_shuffle_downiij",
-      "_Z26intel_sub_group_shuffle_upiij",
-      "_Z26intel_sub_group_shuffle_upffj",
-      "_Z28intel_sub_group_shuffle_downffj",
-      "_Z23intel_sub_group_shufflefj"};
+      "_Z17sub_group_shufflefj",
+      "_Z17sub_group_shuffleij",
+      "_Z21sub_group_shuffle_xorij",
+      "_Z21sub_group_shuffle_xorfj",
+      "_Z22sub_group_shuffle_downiij",
+      "_Z22sub_group_shuffle_downffj",
+      "_Z20sub_group_shuffle_upiij",
+      "_Z20sub_group_shuffle_upffj"};
 
   bool SensitiveFuncFound = false;
   for (auto &FuncName : WarpSizeSensitiveFuncNames) {
@@ -81,15 +77,13 @@ PreservedAnalyses HipWarpsPass::run(Module &Mod, ModuleAnalysisManager &AM) {
 
   auto &Ctx = Mod.getContext();
   for (auto &F : Mod) {
-    for (auto &BB : F) {
-      if (F.getCallingConv() != CallingConv::SPIR_KERNEL)
-        continue;
+    if (F.getCallingConv() != CallingConv::SPIR_KERNEL)
+      continue;
 
-      IntegerType *I32Type = IntegerType::get(Ctx, 32);
-      F.setMetadata("intel_reqd_sub_group_size",
-                    MDNode::get(Ctx, ConstantAsMetadata::get(ConstantInt::get(
-                                         I32Type, CHIP_DEFAULT_WARP_SIZE))));
-    }
+    IntegerType *I32Type = IntegerType::get(Ctx, 32);
+    F.setMetadata("intel_reqd_sub_group_size",
+                  MDNode::get(Ctx, ConstantAsMetadata::get(ConstantInt::get(
+                                       I32Type, CHIP_DEFAULT_WARP_SIZE))));
   }
 
   // The metadata should not impact other CHIP-SPV passes.

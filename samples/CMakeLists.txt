@@ -122,6 +122,7 @@ set(SAMPLES
     hip_async_interop
     hip-cuda
     printf
+    shuffles
     texture
     simple_kernel
     clock
