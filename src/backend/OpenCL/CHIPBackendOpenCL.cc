@@ -375,23 +375,14 @@ void CHIPDeviceOpenCL::populateDevicePropertiesImpl() {
   // totally made up
   HipDeviceProps_.regsPerBlock = 64;
 
-  // The minimum subgroup size on an intel GPU
-  if (ClDevice->getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_GPU) {
-    std::vector<uint> Sg = ClDevice->getInfo<CL_DEVICE_SUB_GROUP_SIZES_INTEL>();
-    if (std::find(Sg.begin(), Sg.end(), CHIP_DEFAULT_WARP_SIZE) != Sg.end()) {
-      HipDeviceProps_.warpSize = CHIP_DEFAULT_WARP_SIZE;
-    }
-    if (Sg.begin() != Sg.end()) {
-      HipDeviceProps_.warpSize = *std::max_element(Sg.begin(), Sg.end());
-    } else {
-      HipDeviceProps_.warpSize = CHIP_DEFAULT_WARP_SIZE;
-    }
-  }
-
-  if (HipDeviceProps_.warpSize != CHIP_DEFAULT_WARP_SIZE) {
-    logWarn("The device doesn't support subgroup size {}, warp-size sensitive "
-            "kernels might not work correctly.",
-            CHIP_DEFAULT_WARP_SIZE);
+  HipDeviceProps_.warpSize = CHIP_DEFAULT_WARP_SIZE;
+  // Try to check that we support the default warp size.
+  std::vector<uint> Sg = ClDevice->getInfo<CL_DEVICE_SUB_GROUP_SIZES_INTEL>();
+  if (std::find(Sg.begin(), Sg.end(), CHIP_DEFAULT_WARP_SIZE) == Sg.end()) {
+    logWarn(
+        "The device might not support subgroup size {}, warp-size sensitive "
+        "kernels might not work correctly.",
+        CHIP_DEFAULT_WARP_SIZE);
   }
 
   HipDeviceProps_.maxGridSize[0] = HipDeviceProps_.maxGridSize[1] =
