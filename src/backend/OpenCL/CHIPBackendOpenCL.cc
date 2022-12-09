@@ -1162,6 +1162,16 @@ void CHIPExecItemOpenCL::setupAllArgs() {
                  ArgsPtr[InArgIdx]);
         Err = ::clSetKernelArg(Kernel->get()->get(), OutArgIdx, Ai.Size,
                                ArgsPtr[InArgIdx]);
+#if 0	
+	// Try again with size 16 to demonstrate the wrong size counting
+	// in the structsize test. This should make the problem go away.
+	// Doesn't crash in Debug mode??
+	if (Err != CL_SUCCESS && Ai.Size == 12)
+	  Ai.Size = 16;
+        Err = ::clSetKernelArg(Kernel->get()->get(), OutArgIdx, Ai.Size,
+                               ArgsPtr[InArgIdx]);
+#endif	
+
         CHIPERR_CHECK_LOG_AND_THROW(Err, CL_SUCCESS, hipErrorTbd,
                                     "clSetKernelArg failed");
       }

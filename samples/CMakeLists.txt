@@ -97,6 +97,7 @@ endfunction()
 
 set(SAMPLES
     abort
+    structsize
     hipmath
     hiptest
     bit_extract
